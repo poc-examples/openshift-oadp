@@ -199,5 +199,23 @@ spec:
 ### Attempt Restoration
 
 ```
-
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: restore-<name-from-list-of-backups>
+  namespace: openshift-adp
+spec:
+  backupName: <name-from-list-of-backups>
+  excludedResources:
+    - nodes
+    - events
+    - events.events.k8s.io
+    - backups.velero.io
+    - restores.velero.io
+    - resticrepositories.velero.io
+    - csinodes.storage.k8s.io
+    - volumeattachments.storage.k8s.io
+    - backuprepositories.velero.io
+  itemOperationTimeout: 1h0m0s
+  scheduleName: every-ten-minutes
 ```
