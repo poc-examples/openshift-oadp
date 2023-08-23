@@ -54,7 +54,10 @@ oc logs deploy/openshift-adp-controller-manager -n openshift-adp
 Create the Azure Blob Storage Account in advance.  Once the account is created OADP will create the blob container for you if it doesn't exist.  We will need to configure it to do this with a service principle.
 
 
+
 ### Create Service Principal
+
+**Note**: The role "Contributor" provides broad permissions. Always ensure that roles are granted based on the principle of least privilege.
 
 ```
 export GUID=<GUID>
@@ -78,7 +81,7 @@ az ad sp create-for-rbac \
 
 ### Create Secrets File
 
-Create secrets file locally with the following information called credentials
+Create secrets file locally with the following information called `credentials`.
 
 ```
 AZURE_STORAGE_ACCOUNT_ACCESS_KEY: <base64-encoded-storage-account-key>
@@ -89,6 +92,9 @@ AZURE_CLIENT_SECRET: <base64-encoded-client-secret>
 AZURE_RESOURCE_GROUP: <base64-encoded-resource-group>
 AZURE_CLOUD_NAME: <Base64EncodedString - "AzurePublicCloud">
 ```
+
+**Note**: The default cloud name is AzurePublicCloud. If you are using a different Azure cloud, make sure to update the AZURE_CLOUD_NAME accordingly.
+
 ### Create Storage Access Secrets
 
 Create a Kubernetes secret in the `openshift-adp` namespace containing your Azure Storage Account Key in order to access Azure Blob Storage
@@ -149,16 +155,23 @@ spec:
 
 ### Validate Velero Installation
 
+Ensure the Velero pods are running in the `openshift-oadp` namespace.
+Check the logs of the Velero deployment to ensure there are no errors.
+
 ```
 oc get pods -n openshift-adp
-oc logs deploy/velero -n openshift-adp
+oc logs pod/velero-<unique-id> -n openshift-adp
 ```
+
 ### Label The Snapshot Class
+
+Before proceeding, understand that labeling helps Velero identify the appropriate `VolumeSnapshotClass` to use when taking a backup.
 
 ```
  oc get volumesnapshotclass -o custom-columns=NAME:.metadata.name,PROVISIONER:.driver,LABELS:.metadata.labels
  oc label volumesnapshotclass csi-azuredisk-vsc velero.io/csi-volumesnapshot-class=true
 ```
+
 ### Test Installation with Manual Backup
 
 ```
@@ -190,7 +203,7 @@ metadata:
   name: <cluster-name>-scheduled-backup
   namespace: openshift-adp
 spec:
-  schedule: '* */8 * * *'
+  schedule: '0 */8 * * *' # This runs every 8 hours. Adjust as necessary.
   template:
     storageLocation: <backupstoragelocation - velero-dpa-1>
     includedNamespaces:
@@ -200,6 +213,8 @@ spec:
 ```
 
 ### Attempt Restoration
+
+**Note**: After restoration, ensure to validate the data and applications to verify that they have been restored correctly.
 
 ```
 apiVersion: velero.io/v1
