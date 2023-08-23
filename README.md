@@ -53,6 +53,9 @@ oc logs deploy/openshift-adp-controller-manager -n openshift-adp
 
 Create the Azure Blob Storage Account in advance.  Once the account is created OADP will create the blob container for you if it doesn't exist.  We will need to configure it to do this with a service principle.
 
+
+### Create Service Principal
+
 ```
 export GUID=<GUID>
 export CLIENT_ID=<CLIENT_ID> 
