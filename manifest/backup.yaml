@@ -1,0 +1,17 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: backup-again-2
+  namespace: openshift-adp
+  labels:
+    velero.io/storage-location: <backupstoragelocation - velero-dpa-1>
+spec:
+  csiSnapshotTimeout: 10m0s
+  defaultVolumesToFsBackup: false
+  includedNamespaces:
+    - tekton
+  itemOperationTimeout: 1h0m0s
+  storageLocation: velero-dpa-1
+  ttl: 720h0m0s
+  volumeSnapshotLocations:
+    - velero-dpa-1
